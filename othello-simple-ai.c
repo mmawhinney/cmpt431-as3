@@ -16,6 +16,7 @@ int SimpleAITurn(Board *b, int color)
     int highestBit = __builtin_clzll(moves);
     for (int i=0; i<moveNum; i++) {
       // Remove the highest bit from possible moves
+      printf("%llu \n", moves);
       moves -= ((ull)1) << (63-highestBit);
       // Get the next highest bit
       highestBit = __builtin_clzll(moves);

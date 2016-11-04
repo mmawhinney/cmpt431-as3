@@ -35,17 +35,32 @@ int GoodAITurn(Board *b, int color) {
 		return 0;
 	return 0;
 }
-
-int minMax(ull move, int depth, int color) {
+Board doMove(Board *b, ull move, int colour) {
+	int highestBit = __builtin_clzll(move);
+	Move m = BIT_TO_MOVE(highestBit);
+//	 Set the third parameter to 1 to echo disks flipped
+	int nflips = FlipDisks(m, b, colour, 1, 1);
+	if (nflips == 0) {
+		printf("Illegal move: no disks flipped!!\n");
+	}
+	PlaceOrFlip(m, b, colour);
+	return *b;
+}
+int minMax(Board *b, ull move, int depth, int colour) {
 	// TODO: terminal node
+	Board legal_moves;
+	int num_moves = EnumerateLegalMoves(*b, colour, &legal_moves);
+//	int num_moves = 0;
 	if (depth <= 0) {
 		return costHeur(move);
 	}
 	// max
-	if (color) {
+	if (colour) {
 		ull best = 0;
+		ull moves = legal_moves.disks[colour];
 		for (int i = 0; i < num_moves; i++) {
-			int value = i;
+			// TODO: value will be number color pieces
+//			int value = minMax(0, depth - 1, color);
 			if (best < i) {
 				best = i;
 			}
@@ -54,8 +69,10 @@ int minMax(ull move, int depth, int color) {
 		// min
 	} else {
 		ull best = ULLONG_MAX;
+		ull moves = legal_moves.disks[!colour];
 		for (int i = 0; i < num_moves; i++) {
-			int value = i;
+			// TODO: value will be number of not color pieces
+//			int value = minMax(0, depth - 1, !color);
 			if (best > i) {
 				best = i;
 			}
