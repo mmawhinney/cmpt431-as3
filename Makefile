@@ -1,6 +1,6 @@
 
-CC = gcc-5.4
-CXX = g++-5.4
+CC = gcc-5
+CXX = g++-5
 CC_FLAGS = -std=c99
 
 ifeq ($(DEBUG), 1)

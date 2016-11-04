@@ -22,12 +22,12 @@ int SimpleAITurn(Board *b, int color)
     }
     Move m = BIT_TO_MOVE(highestBit);
     // Set the third parameter to 1 to echo disks flipped
-    int nflips = FlipDisks(m, b,color, 0, 1);
+    int nflips = FlipDisks(m, b,color, 1, 1);
     if (nflips == 0) {
         printf("Illegal move: no disks flipped!!\n");
     }
     PlaceOrFlip(m, b, color);
-    //PrintBoard(*b);
+    PrintBoard(*b);
     return 1;
   } else return 0;
 }
