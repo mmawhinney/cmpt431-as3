@@ -6,78 +6,81 @@
 
 #define DEPTH 4
 
-int GoodAITurn(Board *b, int color) {
+int GoodAITurn(Board *b, int colour) {
 	// Put your code for minimax here
-	Board legal_moves;
-	int num_moves = EnumerateLegalMoves(*b, color, &legal_moves);
-	if (num_moves > 0) {
-//		// do a random move (rand is seeded in main)
-//		int moveNum = rand() % num_moves;
-//		ull moves = legal_moves.disks[color];
-//		// clz returns the bit number of the first bit set counting from the msb
-//		int highestBit = __builtin_clzll(moves);
-//		for (int i = 0; i < moveNum; i++) {
-//			// Remove the highest bit from possible moves
-//			moves -= ((ull) 1) << (63 - highestBit);
-//			// Get the next highest bit
-//			highestBit = __builtin_clzll(moves);
-//		}
-//		Move m = BIT_TO_MOVE(highestBit);
-//		// Set the third parameter to 1 to echo disks flipped
-//		int nflips = FlipDisks(m, b, color, 1, 1);
-//		if (nflips == 0) {
-//			printf("Illegal move: no disks flipped!!\n");
-//		}
-//		PlaceOrFlip(m, b, color);
-//		PrintBoard(*b);
-//		return 1;
-	} else
-		return 0;
-	return 0;
+	int depth = 2;
+	printf("Turn O\n");
+	printf("Pre AI: black: %llu, White %llu\n", b->disks[X_BLACK],
+			b->disks[O_WHITE]);
+	return minMax(b, 0, depth, colour);
 }
-Board doMove(Board *b, ull move, int colour) {
+
+ull doMove(Board *b, ull move, int colour) {
 	int highestBit = __builtin_clzll(move);
 	Move m = BIT_TO_MOVE(highestBit);
+	move -= ((ull) 1) << (63 - highestBit);
 //	 Set the third parameter to 1 to echo disks flipped
-	int nflips = FlipDisks(m, b, colour, 1, 1);
+	int nflips = FlipDisks(m, b, colour, 0, 1);
 	if (nflips == 0) {
 		printf("Illegal move: no disks flipped!!\n");
 	}
 	PlaceOrFlip(m, b, colour);
-	return *b;
+	return move;
 }
+
 int minMax(Board *b, ull move, int depth, int colour) {
-	// TODO: terminal node
 	Board legal_moves;
 	int num_moves = EnumerateLegalMoves(*b, colour, &legal_moves);
-//	int num_moves = 0;
+	// TODO: terminal node
+	printf("moves: %d\n", num_moves);
 	if (depth <= 0) {
 		return costHeur(move);
 	}
-	// max
-	if (colour) {
-		ull best = 0;
-		ull moves = legal_moves.disks[colour];
-		for (int i = 0; i < num_moves; i++) {
-			// TODO: value will be number color pieces
-//			int value = minMax(0, depth - 1, color);
-			if (best < i) {
-				best = i;
+	if (num_moves > 0) {
+		Board potentialBoards[num_moves];
+		int toUse = 0;
+		ull best;
+		// max
+		if (colour) {
+			best = 0;
+			ull moves = legal_moves.disks[colour];
+
+			for (int i = 0; i < num_moves; i++) {
+				potentialBoards[i] = *b;
+				moves = doMove(&potentialBoards[i], moves, colour);
+				int count = CountBitsOnBoard(&potentialBoards[i], colour);
+
+				if (best < count) {
+					best = count;
+					toUse = i;
+				}
 			}
+			// min
+		} else {
+			best = ULLONG_MAX;
+			ull moves = legal_moves.disks[!colour];
+
+			for (int i = 0; i < num_moves; i++) {
+				potentialBoards[i] = *b;
+				moves = doMove(&potentialBoards[i], moves, !colour);
+				int count = CountBitsOnBoard(&potentialBoards[i], !colour);
+
+				if (best > count) {
+					best = count;
+					toUse = i;
+				}
+			}
+
 		}
+		printf("%d\n", toUse);
+		*b = potentialBoards[toUse];
+		PrintBoard(*b);
+		printf("Post AI: black: %llu, White %llu\n", b->disks[X_BLACK],
+				b->disks[O_WHITE]);
+
 		return best;
-		// min
 	} else {
-		ull best = ULLONG_MAX;
-		ull moves = legal_moves.disks[!colour];
-		for (int i = 0; i < num_moves; i++) {
-			// TODO: value will be number of not color pieces
-//			int value = minMax(0, depth - 1, !color);
-			if (best > i) {
-				best = i;
-			}
-		}
-		return best;
+		return 0;
 	}
 }
 

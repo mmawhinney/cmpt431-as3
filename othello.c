@@ -207,7 +207,7 @@ int main (int argc, const char * argv[])
     // Set to GoodAITurn after you finish implementing it
     // For othello-parallel this should be a parallel implementation
     startTimer(&timer);
-    move_possible |= SimpleAITurn(&gameboard, O_WHITE);
+    move_possible |= GoodAITurn(&gameboard, O_WHITE);
     stopTimer(&timer);
     totalTicks += getTimerTicks(&timer);
     turns++;
