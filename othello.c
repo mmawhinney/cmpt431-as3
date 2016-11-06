@@ -183,7 +183,7 @@ int main (int argc, const char * argv[])
   // uncomment the below line to introduce randomness into the SimpleAI
   // DO NOT do this while running experiments. The randomness introduced
   // by modifying the SimpleAI is more than the change of parallelism
-  //srand(time(NULL));
+  srand(time(NULL));
 
   /* Starting gameboard */
   Board gameboard = {
