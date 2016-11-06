@@ -15,7 +15,7 @@ int SimpleAITurn(Board *b, int color) {
 		// printf("Pre: black: %llu, White %llu\n",b->disks[X_BLACK], b->disks[O_WHITE]);
 		for (int i = 0; i < moveNum; i++) {
 			// Remove the highest bit from possible moves
-			printf("%llu \n", moves);
+//			printf("%llu \n", moves);
 			moves -= ((ull) 1) << (63 - highestBit);
 			// Get the next highest bit
 			highestBit = __builtin_clzll(moves);
