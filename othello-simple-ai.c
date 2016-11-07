@@ -11,7 +11,7 @@ int SimpleAITurn(Board *b, int color) {
 		ull moves = legal_moves.disks[color];
 		// clz returns the bit number of the first bit set counting from the msb
 		int highestBit = __builtin_clzll(moves);
-		printf("Turn X\n");
+//		printf("Turn X\n");
 		// printf("Pre: black: %llu, White %llu\n",b->disks[X_BLACK], b->disks[O_WHITE]);
 		for (int i = 0; i < moveNum; i++) {
 			// Remove the highest bit from possible moves
@@ -28,7 +28,7 @@ int SimpleAITurn(Board *b, int color) {
 		}
 		PlaceOrFlip(m, b, color);
 		// printf("Post black: %llu, White %llu\n",b->disks[X_BLACK], b->disks[O_WHITE]);
-		PrintBoard(*b);
+//		PrintBoard(*b);
 		return 1;
 	} else
 		return 0;

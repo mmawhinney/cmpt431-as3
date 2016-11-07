@@ -9,12 +9,12 @@
 
 int GoodAITurn(Board *b, int colour) {
 	// Put your code for minimax here
-	printf("Turn O\n");
+//	printf("Turn O\n");
 	// printf("Pre AI: black: %llu, White %llu\n", b->disks[X_BLACK],
 	// b->disks[O_WHITE]);
 	int turnScore = minMax(b, DEPTH, colour);
 	// printf("Turn score: %d\n", turnScore);
-	PrintBoard(*b);
+//	PrintBoard(*b);
 	return turnScore;	//minMax(b, 0, DEPTH, colour);
 }
 

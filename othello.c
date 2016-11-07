@@ -196,7 +196,7 @@ int main (int argc, const char * argv[])
   unsigned int turns = 0;
 
   int move_possible;
-  PrintBoard(gameboard);
+//  PrintBoard(gameboard);
 
   do {
     move_possible = 0;
