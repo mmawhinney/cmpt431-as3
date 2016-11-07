@@ -1,6 +1,6 @@
 
-CC = icc
-CXX = icpc
+CC = gcc
+CXX = g++
 CC_FLAGS = -std=c99 -fcilkplus -g
 
 ifeq ($(DEBUG), 1)
@@ -17,5 +17,5 @@ clean:
 othello-serial: othello.c hwtimer.h othello.h othello-human.c othello-simple-ai.c othello-good-ai.c
 	$(CC) $(CC_FLAGS) othello.c othello-simple-ai.c othello-good-ai.c -o othello-serial -D SERIALIZE #. If you want to serialize. 
 
-othello-parallel: hwtimer.h othello.c hwtimer.h othello.h othello-human.c othello-simple-ai.c othello-good-ai.cpp
-	$(CXX) othello.c othello-simple-ai.c othello-good-ai.cpp -o othello-parallel -fcilkplus
+othello-parallel: hwtimer.h othello.c hwtimer.h othello.h othello-human.c othello-simple-ai.c othello-good-ai.c
+	$(CC) $(CC_FLAGS) othello.c othello.h othello-simple-ai.c othello-good-ai.c -o othello-parallel
