@@ -6,6 +6,7 @@
 #include "othello.h"
 
 #define DEPTH 5
+int minMax(Board *b, int depth, int colour);
 
 int GoodAITurn(Board *b, int colour) {
 	// Put your code for minimax here
