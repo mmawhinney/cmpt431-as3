@@ -16,8 +16,7 @@ int GoodAITurn(Board *b, int colour) {
 	Board toUse = *b;
 	int num_moves = EnumerateLegalMoves(toUse, colour, &legal_moves);
 	if(num_moves > 0) {
-		cilk_spawn minMax(b, DEPTH, colour);
-		cilk_sync;
+		minMax(b, DEPTH, colour);
 	} else {
 		return 0;
 	}
@@ -51,22 +50,21 @@ int minMax(Board *b, int depth, int colour) {
 		potentialBoards[i] = *b;
 		moves = doMove(&potentialBoards[i], moves, colour);
 	}
-	int toUse = 0;
+	CILK_C_REDUCER_MAX_INDEX(maxMove, int, 0);
+	CILK_C_REGISTER_REDUCER(maxMove);
 	cilk_for (int i = 0; i < num_moves; i++) {
 		Board *thisMove = &potentialBoards[i];
 		CILK_C_REDUCER_MIN_INDEX(minMove, int, 0);
-		CILK_C_REDUCER_MAX_INDEX(maxMove, int, 0);
 		if (colour) {
-			CILK_C_REGISTER_REDUCER(maxMove);
 			CILK_C_REDUCER_MAX_INDEX_CALC(maxMove, i, minMax(thisMove, depth - 1, !colour));
-			toUse = REDUCER_VIEW(maxMove).index;
-			CILK_C_UNREGISTER_REDUCER(maxMove);
 		} else {
 			CILK_C_REGISTER_REDUCER(minMove);
 			CILK_C_REDUCER_MIN_INDEX_CALC(minMove, i, minMax(thisMove, depth - 1, colour));
 			CILK_C_UNREGISTER_REDUCER(minMove);
 		}
 	}
+	int toUse = REDUCER_VIEW(maxMove).index;
+	CILK_C_UNREGISTER_REDUCER(maxMove);	
 	if(colour){
 		*b = potentialBoards[toUse];
 		return CountBitsOnBoard(b, colour);	
