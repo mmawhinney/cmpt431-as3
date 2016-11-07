@@ -16,7 +16,6 @@ Move offsets[] = {
 int noffsets = sizeof(offsets)/sizeof(Move);
 char diskcolor[] = { '.', 'X', 'O', 'I' };
 
-
 void PrintDisk(int x_black, int o_white)
 {
   printf(" %c", diskcolor[x_black + (o_white << 1)]);

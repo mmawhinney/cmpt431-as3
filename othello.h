@@ -48,7 +48,7 @@ typedef struct { ull disks[2]; } Board;
 
 typedef struct { int row; int col; } Move;
 
-char diskcolor[];
+//char diskcolor[];
 
 /* Players */
 int HumanTurn(Board *b, int color);

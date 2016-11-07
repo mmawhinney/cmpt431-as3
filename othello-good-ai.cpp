@@ -1,11 +1,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
-
+#include <iostream>
 #include <cilk/cilk.h>
+
+#include <cilk/reducer_min_max.h>
 #include "othello.h"
 
 #define DEPTH 5
+int minMax(Board *b, int depth, int colour);
+ull doMove(Board *b, ull move, int colour);
 
 int GoodAITurn(Board *b, int colour) {
 	// Put your code for minimax here
@@ -48,25 +52,23 @@ int minMax(Board *b, int depth, int colour) {
 		best = ULLONG_MAX;
 	}
 	ull moves = legal_moves.disks[colour];
+
 	for (int i = 0; i < num_moves; i++) {
 		potentialBoards[i] = *b;
 		moves = doMove(&potentialBoards[i], moves, colour);
-		int recurse = cilk_spawn
-		minMax(&potentialBoards[i], depth - 1, !colour);
 
 		if (colour) {
-			cilk_sync;
-			if (recurse > best) {
-				best = recurse;
-				*b = potentialBoards[i];
-			}
+			cilk::reducer < cilk::op_max_index<int, int> > maxMove;
+			maxMove->calc_max(i,
+					minMax(&potentialBoards[i], depth - 1, !colour));
+			*b = potentialBoards[maxMove.get_value().first];
+			return 1;
 		} else {
-			if (recurse < best) {
-				best = recurse;
-			}
+			cilk::reducer < cilk::op_min_index<int, int> > minMove;
+			minMove->calc_min(i,
+					minMax(&potentialBoards[i], depth - 1, colour));
 		}
 	}
-
 	return best;
 }
 
