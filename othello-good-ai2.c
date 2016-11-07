@@ -34,8 +34,6 @@ int minMax(Board *b, int depth, int colour) {
 	}
 	Board potentialBoards[num_moves];
 	ull best;
-	CILK_C_REDUCER_MAX_INDEX(maxMove, int, 0);
-	CILK_C_REDUCER_MIN_INDEX(minMove, int, 0);
 	if (colour) {
 		best = 0;
 	} else {
@@ -48,16 +46,20 @@ int minMax(Board *b, int depth, int colour) {
 		moves = doMove(&potentialBoards[i], moves, colour);
 
 		if (colour) {
+			CILK_C_REDUCER_MAX_INDEX(maxMove, int, 0);
 			CILK_C_REGISTER_REDUCER(maxMove);
 			CILK_C_REDUCER_MAX_INDEX_CALC(maxMove, i, minMax(&potentialBoards[i], depth - 1, !colour));
+			int index = REDUCER_VIEW(maxMove).index;
+			CILK_C_UNREGISTER_REDUCER(maxMove);
+			*b = potentialBoards[index];	
 		} else {
+			CILK_C_REDUCER_MIN_INDEX(minMove, int, 0);
 			CILK_C_REGISTER_REDUCER(minMove);
 			CILK_C_REDUCER_MIN_INDEX_CALC(minMove, i, minMax(&potentialBoards[i], depth - 1, colour));
+			CILK_C_UNREGISTER_REDUCER(minMove);
 		}
 	}
 	if(colour){
-		int index = REDUCER_VIEW(maxMove).index;
-		*b = potentialBoards[index];
 		return 1;
 	} else {
 		return best;
