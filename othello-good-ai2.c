@@ -12,8 +12,8 @@ int minMax(Board *b, int depth, int colour);
 ull doMove(Board *b, ull move, int colour);
 
 int GoodAITurn(Board *b, int colour) {
-	int turnScore = minMax(b, DEPTH, colour);
-	return turnScore;	//minMax(b, 0, DEPTH, colour);
+	return minMax(b, DEPTH, colour);
+	//minMax(b, 0, DEPTH, colour);
 }
 
 ull doMove(Board *b, ull move, int colour) {
@@ -34,34 +34,32 @@ int minMax(Board *b, int depth, int colour) {
 		return CountBitsOnBoard(b, colour);
 	}
 	Board potentialBoards[num_moves];
+	ull moves = legal_moves.disks[colour];
+	printf("%p\n", &moves);	
 	for(int i = 0; i < num_moves; i++) {
 		potentialBoards[i] = *b;
+		moves = doMove(&potentialBoards[i], moves, colour);
 	}
-	ull best;
 	CILK_C_REDUCER_MAX_INDEX(maxMove, int, 0);
 	CILK_C_REDUCER_MIN_INDEX(minMove, int, 0);
-	if (colour) {
-		best = 0;
-	} else {
-		best = ULLONG_MAX;
-	}
-	ull moves = legal_moves.disks[colour];
 	cilk_for (int i = 0; i < num_moves; i++) {
-		moves = doMove(&potentialBoards[i], moves, colour);
-
+		Board *thisMove = &potentialBoards[i];
 		if (colour) {
 			CILK_C_REGISTER_REDUCER(maxMove);
-			CILK_C_REDUCER_MAX_INDEX_CALC(maxMove, i, minMax(&potentialBoards[i], depth - 1, !colour));
+			CILK_C_REDUCER_MAX_INDEX_CALC(maxMove, i, minMax(thisMove, depth - 1, !colour));
 			CILK_C_UNREGISTER_REDUCER(maxMove);
 		} else {
 			CILK_C_REGISTER_REDUCER(minMove);
-			CILK_C_REDUCER_MIN_INDEX_CALC(minMove, i, minMax(&potentialBoards[i], depth - 1, colour));
+			CILK_C_REDUCER_MIN_INDEX_CALC(minMove, i, minMax(thisMove, depth - 1, colour));
 			CILK_C_UNREGISTER_REDUCER(minMove);
 		}
 	}
 	if(colour){
 		int index = REDUCER_VIEW(maxMove).index;
-		*b = potentialBoards[index];	
+		*b = potentialBoards[index];
+		return CountBitsOnBoard(b, colour);	
+	} else {
+		return CountBitsOnBoard(b, !colour);
 	}
 }
 
