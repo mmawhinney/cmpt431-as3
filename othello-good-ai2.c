@@ -2,11 +2,12 @@
 #include <stdio.h>
 #include <limits.h>
 #include <cilk/cilk.h>
+#include <cilk/cilk_api.h>
 #include <cilk/reducer.h>
 #include <cilk/reducer_min_max.h>
 #include "othello.h"
 
-#define DEPTH 5
+#define DEPTH 2
 int minMax(Board *b, int depth, int colour);
 ull doMove(Board *b, ull move, int colour);
 
@@ -33,36 +34,34 @@ int minMax(Board *b, int depth, int colour) {
 		return CountBitsOnBoard(b, colour);
 	}
 	Board potentialBoards[num_moves];
+	for(int i = 0; i < num_moves; i++) {
+		potentialBoards[i] = *b;
+	}
 	ull best;
+	CILK_C_REDUCER_MAX_INDEX(maxMove, int, 0);
+	CILK_C_REDUCER_MIN_INDEX(minMove, int, 0);
 	if (colour) {
 		best = 0;
 	} else {
 		best = ULLONG_MAX;
 	}
 	ull moves = legal_moves.disks[colour];
-
 	cilk_for (int i = 0; i < num_moves; i++) {
-		potentialBoards[i] = *b;
 		moves = doMove(&potentialBoards[i], moves, colour);
 
 		if (colour) {
-			CILK_C_REDUCER_MAX_INDEX(maxMove, int, 0);
 			CILK_C_REGISTER_REDUCER(maxMove);
 			CILK_C_REDUCER_MAX_INDEX_CALC(maxMove, i, minMax(&potentialBoards[i], depth - 1, !colour));
-			int index = REDUCER_VIEW(maxMove).index;
 			CILK_C_UNREGISTER_REDUCER(maxMove);
-			*b = potentialBoards[index];	
 		} else {
-			CILK_C_REDUCER_MIN_INDEX(minMove, int, 0);
 			CILK_C_REGISTER_REDUCER(minMove);
 			CILK_C_REDUCER_MIN_INDEX_CALC(minMove, i, minMax(&potentialBoards[i], depth - 1, colour));
 			CILK_C_UNREGISTER_REDUCER(minMove);
 		}
 	}
 	if(colour){
-		return 1;
-	} else {
-		return best;
+		int index = REDUCER_VIEW(maxMove).index;
+		*b = potentialBoards[index];	
 	}
 }
 
